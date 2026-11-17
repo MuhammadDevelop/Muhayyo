@@ -7,7 +7,9 @@ import {
   FaCircleInfo,
   FaXmark,
   FaHeart,
-  FaCheck
+  FaCheck,
+  FaUserShield,
+  FaEnvelope
 } from 'react-icons/fa6'
 import useTranslate from '../hooks/useTranslate'
 
@@ -17,7 +19,11 @@ export const Navbar = ({
   searchQuery,
   setSearchQuery,
   onOpenInfoModal,
-  likedCount = 0
+  likedCount = 0,
+  isAdmin = false,
+  onOpenAdmin,
+  onOpenEmailModal,
+  currentUserEmail = ''
 }) => {
   const { t, language, setLanguage, languages } = useTranslate()
   const [isLangOpen, setIsLangOpen] = useState(false)
@@ -36,10 +42,10 @@ export const Navbar = ({
 
   return (
     <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/80 dark:bg-slate-950/80 border-b border-slate-200/80 dark:border-slate-800/80 transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-3 sm:gap-4">
         
         {/* Brand Logo */}
-        <div className="flex items-center gap-3 select-none">
+        <div className="flex items-center gap-3 select-none flex-shrink-0">
           <div className="relative group flex items-center justify-center w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-500 via-teal-500 to-cyan-500 shadow-lg shadow-emerald-500/30 group-hover:shadow-emerald-500/50 transition-all duration-300">
             <FaMusic className="text-white text-lg group-hover:scale-110 transition-transform duration-300" />
             <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border-2 border-white dark:border-slate-950 animate-pulse" />
@@ -60,7 +66,7 @@ export const Navbar = ({
         </div>
 
         {/* Live Search Bar */}
-        <div className="flex-1 max-w-md mx-2 sm:mx-6">
+        <div className="flex-1 max-w-md mx-1 sm:mx-4">
           <div className="relative flex items-center">
             <FaMagnifyingGlass className="absolute left-3.5 text-slate-400 dark:text-slate-500 pointer-events-none text-sm" />
             <input
@@ -83,12 +89,48 @@ export const Navbar = ({
           </div>
         </div>
 
-        {/* Right Action Icons: Favorites Count, Language Selector, Info, Theme Toggle */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        {/* Right Action Icons */}
+        <div className="flex items-center gap-1.5 sm:gap-2.5 flex-shrink-0">
+          
+          {/* Email Capture Trigger (agar email kiritilmagan bo'lsa) */}
+          {!currentUserEmail ? (
+            <button
+              onClick={onOpenEmailModal}
+              className="hidden lg:flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 text-xs font-bold transition active:scale-95"
+              title={t('navbar.join')}
+            >
+              <FaEnvelope className="w-3.5 h-3.5" />
+              <span>{t('navbar.join')}</span>
+            </button>
+          ) : (
+            <div
+              className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-300 font-medium max-w-[150px] truncate"
+              title={currentUserEmail}
+            >
+              <FaCheck className="w-3 h-3 text-emerald-500 flex-shrink-0" />
+              <span className="truncate">{currentUserEmail}</span>
+            </div>
+          )}
+
+          {/* Admin Button */}
+          <button
+            onClick={onOpenAdmin}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-2xl border text-xs font-bold transition-all duration-200 shadow-sm active:scale-95 ${
+              isAdmin
+                ? 'bg-emerald-500 text-white border-emerald-400/50 shadow-emerald-500/25'
+                : 'bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-800 hover:border-emerald-500/50'
+            }`}
+            title={t('navbar.admin')}
+            aria-label={t('navbar.admin')}
+          >
+            <FaUserShield className={`w-3.5 h-3.5 ${isAdmin ? 'text-white' : 'text-emerald-500'}`} />
+            <span className="hidden sm:inline">{t('navbar.admin')}</span>
+          </button>
+
           {/* Favorites Badge */}
           {likedCount > 0 && (
             <div
-              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 dark:text-rose-400 text-xs font-semibold"
+              className="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-500 dark:text-rose-400 text-xs font-semibold"
               title={t('navbar.favorites')}
             >
               <FaHeart className="w-3.5 h-3.5 fill-current" />
@@ -100,7 +142,7 @@ export const Navbar = ({
           <div className="relative" ref={langDropdownRef}>
             <button
               onClick={() => setIsLangOpen(prev => !prev)}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-800 hover:scale-105 active:scale-95 transition-all duration-200 shadow-sm text-xs font-bold"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-2xl bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-800 hover:scale-105 active:scale-95 transition-all duration-200 shadow-sm text-xs font-bold"
               title={t('navbar.switchLanguage')}
               aria-label={t('navbar.switchLanguage')}
             >
@@ -149,7 +191,7 @@ export const Navbar = ({
             title={t('navbar.aboutPlatform')}
             aria-label={t('navbar.aboutPlatform')}
           >
-            <FaCircleInfo className="w-5 h-5" />
+            <FaCircleInfo className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
 
           {/* Dark / Light Mode Switcher */}
@@ -160,9 +202,9 @@ export const Navbar = ({
             aria-label={theme === 'dark' ? t('navbar.switchToLight') : t('navbar.switchToDark')}
           >
             {theme === 'dark' ? (
-              <FaSun className="w-5 h-5 text-amber-400 animate-spin-slow" />
+              <FaSun className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400 animate-spin-slow" />
             ) : (
-              <FaMoon className="w-5 h-5 text-indigo-600" />
+              <FaMoon className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />
             )}
           </button>
         </div>

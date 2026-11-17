@@ -1,9 +1,11 @@
-import React, { useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import useTheme from './hooks/useTheme'
 import useModal from './hooks/useModal'
 import useMusicApi from './hooks/useMusicApi'
 import useAudioPlayer from './hooks/useAudioPlayer'
 import useTranslate from './hooks/useTranslate'
+import useAdminAuth from './hooks/useAdminAuth'
+import useVisitorEmails from './hooks/useVisitorEmails'
 
 import Navbar from './components/Navbar'
 import StatsBanner from './components/StatsBanner'
@@ -11,6 +13,9 @@ import GenreFilter from './components/GenreFilter'
 import SongList from './components/SongList'
 import AudioPlayerBar from './components/AudioPlayerBar'
 import Modal from './components/Modal'
+import AdminPanel from './components/AdminPanel'
+import AdminLoginModal from './components/AdminLoginModal'
+import EmailCaptureModal from './components/EmailCaptureModal'
 
 export default function App() {
   const { t } = useTranslate()
@@ -18,14 +23,47 @@ export default function App() {
   // Theme Hook (Dark / Light mode)
   const { theme, toggleTheme } = useTheme()
 
+  // Admin Auth Hook (Login: Muhammad, Parol: Muhammad 02)
+  const {
+    isAdmin,
+    adminUser,
+    login: adminLogin,
+    logout: adminLogout,
+    authError,
+    clearError
+  } = useAdminAuth()
+
+  // Visitor Emails Hook (Saqlanuvchi foydalanuvchilar emaillari)
+  const {
+    emails,
+    addEmail,
+    deleteEmail,
+    exportToCsv,
+    currentEmail,
+    hasSubmittedEmail
+  } = useVisitorEmails()
+
+  // UI States
+  const [isAdminView, setIsAdminView] = useState(false)
+  const [isAdminLoginModalOpen, setIsAdminLoginModalOpen] = useState(false)
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false)
+
+  // Yangi foydalanuvchi kirganida email so'rash oynasini ko'rsatish
+  useEffect(() => {
+    if (!hasSubmittedEmail) {
+      // Birinchi tashrifda foydalanuvchiga xalaqit bermasdan 2 soniyadan keyin taklif qilish
+      const timer = setTimeout(() => {
+        setIsEmailModalOpen(true)
+      }, 2000)
+      return () => clearTimeout(timer)
+    }
+  }, [hasSubmittedEmail])
+
   // Modal Hook (Replaces alert)
   const {
     modalState,
     openModal,
     closeModal,
-    showSuccess,
-    showInfo,
-    showError,
     showSongDetail
   } = useModal()
 
@@ -113,6 +151,35 @@ export default function App() {
     })
   }
 
+  // Admin Panelga o'tish yoki login oynasini ochish
+  const handleOpenAdmin = () => {
+    if (isAdmin) {
+      setIsAdminView(true)
+    } else {
+      setIsAdminLoginModalOpen(true)
+    }
+  }
+
+  // Agar admin boshqaruv ko'rinishi faol bo'lsa va admin login qilingan bo'lsa
+  if (isAdminView && isAdmin) {
+    return (
+      <AdminPanel
+        adminUser={adminUser}
+        theme={theme}
+        toggleTheme={toggleTheme}
+        emails={emails}
+        onAddEmail={addEmail}
+        onDeleteEmail={deleteEmail}
+        onExportCsv={exportToCsv}
+        onBackToSite={() => setIsAdminView(false)}
+        onLogout={() => {
+          adminLogout()
+          setIsAdminView(false)
+        }}
+      />
+    )
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-300 flex flex-col font-sans">
       
@@ -124,6 +191,10 @@ export default function App() {
         setSearchQuery={setSearchQuery}
         onOpenInfoModal={handleOpenInfoModal}
         likedCount={likedSongIds.length}
+        isAdmin={isAdmin}
+        onOpenAdmin={handleOpenAdmin}
+        onOpenEmailModal={() => setIsEmailModalOpen(true)}
+        currentUserEmail={currentEmail}
       />
 
       {/* Main Content Area */}
@@ -208,6 +279,25 @@ export default function App() {
         onConfirm={modalState.onConfirm}
         onCancel={modalState.onCancel}
         onClose={closeModal}
+      />
+
+      {/* Admin Login Modal (Login: Muhammad, Parol: Muhammad 02) */}
+      <AdminLoginModal
+        isOpen={isAdminLoginModalOpen}
+        onClose={() => setIsAdminLoginModalOpen(false)}
+        loginFn={adminLogin}
+        authError={authError}
+        clearError={clearError}
+        onLoginSuccess={() => {
+          setIsAdminView(true)
+        }}
+      />
+
+      {/* New Visitor Email Capture Modal */}
+      <EmailCaptureModal
+        isOpen={isEmailModalOpen}
+        onClose={() => setIsEmailModalOpen(false)}
+        onSubmitEmail={addEmail}
       />
 
     </div>
