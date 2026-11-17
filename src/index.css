@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  }
+}
+
+/* Custom glowing pulse animations & audio bar equalizer */
+@keyframes soundwave {
+  0%, 100% {
+    height: 6px;
+  }
+  50% {
+    height: 24px;
+  }
+}
+
+.animate-wave-1 {
+  animation: soundwave 1s ease-in-out infinite;
+}
+.animate-wave-2 {
+  animation: soundwave 1.2s ease-in-out 0.2s infinite;
+}
+.animate-wave-3 {
+  animation: soundwave 0.8s ease-in-out 0.4s infinite;
+}
+.animate-wave-4 {
+  animation: soundwave 1.1s ease-in-out 0.1s infinite;
+}
+
+/* Range input styling */
+input[type="range"] {
+  accent-color: #10b981;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.4);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.6);
+}
